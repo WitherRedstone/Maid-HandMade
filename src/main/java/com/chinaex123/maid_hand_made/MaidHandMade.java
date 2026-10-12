@@ -2,6 +2,8 @@ package com.chinaex123.maid_hand_made;
 
 import com.chinaex123.maid_hand_made.init.ModAttachments;
 import com.chinaex123.maid_hand_made.init.ModDataComponents;
+import com.chinaex123.maid_hand_made.init.ModNetwork;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -18,5 +20,10 @@ public class MaidHandMade {
     public MaidHandMade(IEventBus modEventBus, ModContainer modContainer) {
         ModAttachments.ATTACHMENT_TYPES.register(modEventBus);
         ModDataComponents.DATA_COMPONENTS.register(modEventBus);
+        ModNetwork.register(modEventBus);
+    }
+
+    public static ResourceLocation id(String name) {
+        return ResourceLocation.fromNamespaceAndPath(MaidHandMade.MODID, name);
     }
 }
