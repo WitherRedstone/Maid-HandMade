@@ -1,5 +1,6 @@
 package com.chinaex123.maid_hand_made.maid.behavior.handmade;
 
+import com.alben.createhandmade.bellows.BellowsMediaRegistry;
 import com.alben.createhandmade.item.BellowsItem;
 import com.chinaex123.maid_hand_made.maid.behavior.MaidUseItemOnMachineBehavior;
 import com.chinaex123.maid_hand_made.util.BellowsHelper;
@@ -9,9 +10,12 @@ import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * 风箱。
@@ -75,7 +79,11 @@ public class MaidUseBellowsBehavior extends MaidUseItemOnMachineBehavior {
 
         // 副手介质
         ItemStack media = getOffHandStack(maid);
-        if (media.isEmpty()) return true;
+        if (media.isEmpty()) {
+            if (!autoStockOffHand(maid)) return true;
+            media = getOffHandStack(maid);
+            if (media.isEmpty()) return true;
+        }
 
         // 加工
         if (BellowsHelper.process(world, pos, media)) {
@@ -84,5 +92,24 @@ public class MaidUseBellowsBehavior extends MaidUseItemOnMachineBehavior {
             completedWork = true;
         }
         return true;
+    }
+
+    private boolean autoStockOffHand(EntityMaid maid) {
+        IItemHandler inv = maid.getCapability(Capabilities.ItemHandler.ENTITY);
+        if (inv == null) return false;
+
+        for (int i = 0; i < inv.getSlots(); i++) {
+            ItemStack candidate = inv.getStackInSlot(i);
+            if (candidate.isEmpty()) continue;
+
+            if (BellowsMediaRegistry.resolve(candidate) != null) {
+                ItemStack moved = inv.extractItem(i, candidate.getCount(), false);
+                if (!moved.isEmpty()) {
+                    maid.setItemInHand(InteractionHand.OFF_HAND, moved);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
