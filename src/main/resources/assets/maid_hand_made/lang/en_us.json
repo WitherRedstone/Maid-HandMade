@@ -1,0 +1,8 @@
+{
+  "task.maid_hand_made.hand_made": "Hand Made",
+  "task.maid_hand_made.hand_made.desc": "Maid will look for nearby Create machines to operate using Hand Made items.",
+
+  "tooltip.maid_hand_made.bound": "Bound: %s",
+  "message.maid_hand_made.bound_success": "Bound to %s %s",
+  "message.maid_hand_made.bound_cleared": "Binding cleared"
+}

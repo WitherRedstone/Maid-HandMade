@@ -19,23 +19,56 @@ sourceSets.main.resources {
 }
 
 repositories {
+    mavenLocal()
+
     maven { name = 'ForgeCDN'; url = 'https://neoforged.forgecdn.net/releases'}
     maven { name = 'ForgeCDNMojang'; url = 'https://neoforged.forgecdn.net/mojang-meta'}
     maven { name = 'Mojang'; url = 'https://libraries.minecraft.net/'}
-    maven { name = "CurseForge"; url = "https://cursemaven.com"}
-    maven { name = "Modrinth"; url = "https://api.modrinth.com/maven" }
-    maven { name = "ModMaven"; url = "https://modmaven.dev" }
+
+    maven {
+        name = "CurseForge"
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
 
     // JEI
-    maven { name = "Jared's maven"; url = "https://maven.blamejared.com/"}
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
 
     // Create
-    maven { name = 'DevOS'; url = "https://mvn.devos.one/snapshots" }
-    maven { name = "CreateMod"; url = "https://maven.createmod.net" }
-    maven { name = "Ithundxr"; url = "https://maven.ithundxr.dev/snapshots" }
+    maven {
+        name = "DevOS"
+        url = "https://mvn.devos.one/snapshots"
+    }
+    maven {
+        name = "CreateMod"
+        url = "https://maven.createmod.net"
+    }
+    maven {
+        name = "Ithundxr"
+        url = "https://maven.ithundxr.dev/snapshots"
+    }
 
     // Curios
-    maven { name = "Illusive Soulworks Maven"; url = "https://maven.theillusivec4.top/" }
+    maven {
+        name = "Illusive Soulworks Maven"
+        url = "https://maven.theillusivec4.top/"
+    }
 }
 
 base {
