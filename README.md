@@ -9,6 +9,86 @@
 
 ## Introduction
 
+Allows maids to use items from [Create: Hand Made] for processing tasks.
+
+## Binding System
+
+Tools that support binding (Press Hammer, Stirring Staff, Infusion Gun, Bellows) can bind to a target block. Once bound, the maid will keep working at that block until it is broken.
+
+
+## Tool Usage
+
+* **Press Hammer**
+  - Usage: Give the maid a Press Hammer in her main hand. She will automatically find basins, belts, and depots with valid pressing recipes.
+  - Details:
+    - Shift + Right-click the target block with the hammer to bind it, then give the bound hammer to the maid. She will remember the position and keep working there until the block is broken.
+    - Shift + Right-click air or an invalid block to clear binding; Shift + Right-click a new target to replace an existing binding.
+    - If no binding is set, the maid will travel to any basin, belt, or depot that has a valid recipe.
+    - Target validation only checks for recipes: basins must be non-empty and match a pressing recipe, depots must have an item and match a pressing recipe, belts must have at least one item that matches a pressing recipe.
+    - Plays particles and mechanic press sound on each operation, and consumes 1 durability.
+    - Only belts have special standing rules: the maid may not stand on the belt face or directly above it; basins and depots have no restriction.
+
+* **Mortar**
+  - Usage: Give the maid a Mortar in her main hand and grindable materials in her offhand. She will grind in place.
+  - Details:
+    - Place the mortar in main hand or backpack, and materials in offhand or backpack — the maid will start grinding automatically.
+    - The maid stands still while grinding. Products enter her backpack on completion, and she will automatically restock and continue until materials run out or the mortar breaks.
+    - If interrupted mid-grind, unfinished materials in the mortar are returned to the backpack — nothing is lost.
+
+* **Crusher Mortar**
+  - Usage: Give the maid a Crusher Mortar in her main hand and crushable materials in her offhand. She will crush in place.
+  - Details:
+    - Place the crusher mortar in main hand or backpack, and materials in offhand or backpack — the maid will start crushing automatically.
+    - The maid stands still while crushing. Products enter her backpack on completion, and she will automatically restock and continue until materials run out or the crusher mortar breaks.
+    - When no crushing recipe is available, it will automatically fall back to grinding recipes.
+    - If interrupted mid-crush, unfinished materials in the crusher mortar are returned to the backpack — nothing is lost.
+
+* **Pointer**
+  - Usage: Give the maid a Pointer in her main hand and processing media in her backpack. She will automatically find depots and belts with items to process.
+  - Details:
+    - Right-click a depot with the pointer to bind it, then give the bound pointer to the maid. She will remember the position and keep working there until the block is broken.
+    - If no binding is set, the maid will travel to any depot or belt with items.
+    - **Offhand auto-stocking**: When the offhand is empty, the maid automatically searches her backpack for a medium that matches a recipe with the item on the target block, and moves it to her offhand.
+    - Target validation only checks for item presence; the recipe is evaluated at processing time. If no matching recipe is found, no processing occurs.
+    - Plays item pickup sound and matching particles on each operation, and consumes the offhand tool according to the recipe.
+
+* **Stirring Staff**
+  - Usage: Give the maid a Stirring Staff in her main hand. She will automatically find basins with valid stirring recipes.
+  - Details:
+    - Shift + Right-click a basin with the staff to bind it, then give the bound staff to the maid. She will remember the position and keep working there until the block is broken.
+    - Shift + Right-click air or an invalid block to clear binding; Shift + Right-click a new target to replace an existing binding.
+    - If no binding is set, the maid will travel to any basin with a valid recipe.
+    - The maid stands still while stirring. From tick 8 onwards, plays sound and stirring particles every 4 ticks.
+    - One stirring cycle lasts 60 ticks. On completion, applies the recipe output and consumes 1 durability.
+    - If the basin has no matching recipe, stirring will not begin. If interrupted, the cycle is voided and no output is produced.
+
+* **Infusion Gun**
+  - Usage: Give the maid an Infusion Gun in her main hand. She will automatically choose between drawing, injecting, or storing fluid based on the gun's contents.
+  - Details:
+    - Shift + Right-click a block to bind it. The maid will prioritize working at the bound position. See "Binding System" above.
+    - Give the infusion gun to the maid (main hand or backpack). She will automatically seek nearby fluid source blocks, fluid handlers, depots, and belts.
+    - Gun is empty: Priority 1 — draw from fluid source blocks; Priority 2 — extract from fluid containers
+    - Gun has fluid: Priority 1 — inject items on belts; Priority 2 — inject items on depots (matching infusion recipes or fillable items); Priority 3 — store into fluid containers.
+    - **Basin rules**: Basins can only be drawn from (cannot be injected into).
+    - Each operation consumes 1 durability, plays matching fluid sounds and particles. Depots update block state after injection.
+
+* **Bellows**
+  - Usage: Give the maid a Bellows in her main hand and processing media in her backpack. She will automatically process items on depots and belts.
+  - Details:
+    - Shift + Right-click a block to bind it. The maid will prioritize working at the bound position. See "Binding System" above.
+    - Give the bellows to the maid (main hand or backpack). She will automatically process items on depots and belts.
+    - **Offhand auto-stocking of media**: When the offhand is empty, the maid automatically searches her backpack for a medium recognized by the BellowsMediaRegistry (e.g. blaze rods, ice blocks, note blocks) and moves it to her offhand.
+    - Target validation only checks for item presence; medium compatibility is evaluated at processing time. If no valid medium is available, no processing occurs.
+    - Consumes 1 durability on success. The maid stands still while processing.
+
+* **Hand Saw**
+  - Usage: Give the maid a Hand Saw in her main hand and cuttable materials in her offhand. She will cut in place.
+  - Details:
+    - Place the hand saw in main hand or backpack, and materials in offhand or backpack — the maid will start cutting automatically.
+    - The maid stands still while cutting. Produces one item every 30 ticks, and plays saw sound and particles every 4 ticks from tick 10 onwards.
+    - Products enter the backpack on completion, and she will automatically restock and continue until the offhand runs out of materials or no valid recipe exists.
+    - Supports multi-output and probability-based outputs, and preserves container residues. Each cut consumes 1 durability.
+    - Automatically stops when the main hand no longer holds the hand saw or the offhand materials run out.
 
 ---
 
@@ -16,18 +96,11 @@
 
 ## 简介
 
-可以让女仆使用[机械动力：手搓学]的物品进行加工
+让女仆可以使用[机械动力：手搓学]的物品进行加工
 
 ## 绑定系统
 
 带有绑定功能的工具（冲压锤、搅拌杖、灌注枪、风箱）支持绑定方块，绑定后女仆会一直去该方块工作，直到方块被破坏。
-
-| 操作                 | 效果                                    |
-|--------------------|---------------------------------------|
-| Shift+右键 目标方块      | 清除旧绑定 + 绑定新位置（成功后显示青色 AABB 框 + 经验球音效） |
-| Shift+右键 空气 / 无效方块 | 仅清除绑定                                 |
-| 已绑定 → Shift+右键 新目标 | 自动替换为新位置                              |
-| Pointer            | 使用原 mod 自带的绑定逻辑（不参与以上系统）              |
 
 ## 工具使用
 
