@@ -55,18 +55,17 @@ public class MaidUseInfusionGunBehavior extends MaidUseItemOnMachineBehavior {
         ItemStack gun = getMainHandStack(maid);
         if (gun.isEmpty() || !(gun.getItem() instanceof InfusionGunItem)) return false;
 
-        // 工作盆不归灌注枪管
-        if (world.getBlockEntity(pos) instanceof BasinBlockEntity) return false;
-
         InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        boolean isBasin = world.getBlockEntity(pos) instanceof BasinBlockEntity;
 
-        // 枪空：吸流体源 / 抽容器
+        // 枪空：吸流体源 / 抽容器（含 Basin，Basin 可抽不可放）
         if (contents.isEmpty()) {
             if (InfusionGunHelper.isFluidSource(world, pos)) return true;
             return InfusionGunHelper.containerHasFluid(world, pos);
         }
 
-        // 枪有流体：注入传送带 / 置物台物品 / 存容器
+        // 枪有流体：注入传送带 / 置物台物品 / 存容器（Basin 不作为注入目标）
+        if (isBasin) return false;
         if (BlockEntityBehaviour.get(world, pos, TransportedItemStackHandlerBehaviour.TYPE) != null) {
             return InfusionGunHelper.beltHasInjectable(world, pos, gun);
         }
@@ -94,9 +93,11 @@ public class MaidUseInfusionGunBehavior extends MaidUseItemOnMachineBehavior {
         maid.setDeltaMovement(0, maid.getDeltaMovement().y, 0);
         maid.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 
-        if (world.getBlockEntity(pos) instanceof BasinBlockEntity) return true;
-
         InfusionGunContents contents = InfusionGunItem.getContents(stack);
+        boolean isBasin = world.getBlockEntity(pos) instanceof BasinBlockEntity;
+
+        // 工作盆 只能抽不能放：枪有流体时直接跳过
+        if (isBasin && !contents.isEmpty()) return true;
 
         // 枪空：吸 / 抽
         if (contents.isEmpty()) {
@@ -141,8 +142,7 @@ public class MaidUseInfusionGunBehavior extends MaidUseItemOnMachineBehavior {
     }
 
     private static boolean isAnyTargetBlock(ServerLevel world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof BasinBlockEntity) return false;
-
+        // 工作盆 有流体能力：枪空时抽（走 isMachineFor 里的分支），枪有流体时 isMachineFor 已排除
         if (InfusionGunHelper.isFluidSource(world, pos)) return true;
         if (world.getBlockEntity(pos) instanceof DepotBlockEntity) return true;
         if (BlockEntityBehaviour.get(world, pos,
