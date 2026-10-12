@@ -1,0 +1,8 @@
+{
+  "task.maid_hand_made.hand_made": "手搓学",
+  "task.maid_hand_made.hand_made.desc": "女仆会寻找周围的机械动力机器使用手搓学物品进行操作",
+
+  "tooltip.maid_hand_made.bound": "已绑定：%s",
+  "message.maid_hand_made.bound_success": "已绑定到 %s %s",
+  "message.maid_hand_made.bound_cleared": "已清除绑定"
+}
