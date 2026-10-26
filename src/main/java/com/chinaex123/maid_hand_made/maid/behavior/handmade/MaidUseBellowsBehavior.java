@@ -102,7 +102,7 @@ public class MaidUseBellowsBehavior extends MaidUseItemOnMachineBehavior {
             ItemStack candidate = inv.getStackInSlot(i);
             if (candidate.isEmpty()) continue;
 
-            if (BellowsMediaRegistry.resolve(candidate) != null) {
+            if (!BellowsMediaRegistry.resolveEffective(candidate).ids().isEmpty()) {
                 ItemStack moved = inv.extractItem(i, candidate.getCount(), false);
                 if (!moved.isEmpty()) {
                     maid.setItemInHand(InteractionHand.OFF_HAND, moved);

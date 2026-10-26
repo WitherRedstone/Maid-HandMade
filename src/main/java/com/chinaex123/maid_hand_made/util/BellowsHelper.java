@@ -7,8 +7,12 @@ import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.chinaex123.maid_hand_made.mixin.BellowsItemMixin;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public final class BellowsHelper {
 
@@ -32,17 +36,20 @@ public final class BellowsHelper {
     }
 
     public static boolean canProcess(Level level, BlockPos pos, ItemStack media) {
-        FanProcessingType type = media.isEmpty() ? null : BellowsMediaRegistry.resolve(media);
-        if (type == null) return false;
+        if (media.isEmpty()) return false;
+        BellowsMediaRegistry.EffectiveTypes effective = BellowsMediaRegistry.resolveEffective(media);
+        if (effective.ids().isEmpty()) return false;
 
-        if (!isBellowsTarget(level, pos)) return false;
-
-        return true;
+        return isBellowsTarget(level, pos);
     }
 
     public static boolean process(Level level, BlockPos pos, ItemStack media) {
-        FanProcessingType type = media.isEmpty() ? null : BellowsMediaRegistry.resolve(media);
-        if (type == null) return false;
-        return BellowsItemMixin.invokeApplyToTarget(level, pos, type);
+        if (media.isEmpty()) return false;
+        BellowsMediaRegistry.EffectiveTypes effective = BellowsMediaRegistry.resolveEffective(media);
+        List<ResourceLocation> candidateIds = effective.ids();
+        if (candidateIds.isEmpty()) return false;
+        @Nullable ResourceLocation preferred = effective.preferred();
+        FanProcessingType[] pickedOut = new FanProcessingType[]{null};
+        return BellowsItemMixin.invokeApplyToTarget(level, pos, candidateIds, preferred, pickedOut);
     }
 }
