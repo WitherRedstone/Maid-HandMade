@@ -23,15 +23,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.common.util.TriState;
 
 @EventBusSubscriber
 public class ManualBindHandler {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Player rawPlayer = event.getEntity();
         Level level = event.getLevel();
@@ -45,18 +47,18 @@ public class ManualBindHandler {
 
         if (clearIfBound(stack)) {
             onCleared(serverPlayer);
-            if (!isValidBindTarget(stack.getItem(), serverLevel, event.getPos())) {
-                event.setCanceled(true);
-                return;
-            }
-        } else {
-            if (!isValidBindTarget(stack.getItem(), serverLevel, event.getPos())) return;
+            event.setUseItem(TriState.FALSE);
+            event.setUseBlock(TriState.FALSE);
+        }
+
+        if (!isValidBindTarget(stack.getItem(), serverLevel, event.getPos())) {
+            return;
         }
 
         doBind(event, serverPlayer, serverLevel, stack);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         Player rawPlayer = event.getEntity();
         Level level = event.getLevel();
@@ -69,7 +71,6 @@ public class ManualBindHandler {
 
         if (clearIfBound(stack)) {
             onCleared(serverPlayer);
-            event.setCanceled(true);
         }
     }
 
@@ -100,9 +101,8 @@ public class ManualBindHandler {
                                ServerPlayer player, ServerLevel level, ItemStack stack) {
         BlockPos pos = event.getPos();
         setBound(player, level, pos, stack);
-        if (!(stack.getItem() instanceof PointerItem)) {
-            event.setCanceled(true);
-        }
+        event.setUseItem(TriState.FALSE);
+        event.setUseBlock(TriState.FALSE);
     }
 
     private static boolean clearIfBound(ItemStack stack) {
