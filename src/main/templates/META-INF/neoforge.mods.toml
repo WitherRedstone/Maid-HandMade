@@ -40,8 +40,15 @@ config="${mod_id}.mixins.json"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
-    modId="create"
+    modId="create_hand_made"
     type="required"
-    versionRange="[6.0.10,6.1.0)"
+    versionRange="[0.6,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="touhou_little_maid"
+    type="required"
+    versionRange="[1.5.3,)"
     ordering="AFTER"
     side="BOTH"

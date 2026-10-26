@@ -131,7 +131,7 @@ dependencies {
     compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${minecraft_version}:${flywheel_version}")
     runtimeOnly("dev.engine-room.flywheel:flywheel-neoforge-${minecraft_version}:${flywheel_version}")
     implementation("com.tterrag.registrate:Registrate:${registrate_version}")
-    implementation "curse.maven:create-hand-made-1712724:9099912"
+    implementation "curse.maven:create-hand-made-1712724:9319202"
     implementation "maven.modrinth:touhou-little-maid:1.5.3-neoforge+mc1.21.1"
     
     implementation "curse.maven:jei-238222:7420587"

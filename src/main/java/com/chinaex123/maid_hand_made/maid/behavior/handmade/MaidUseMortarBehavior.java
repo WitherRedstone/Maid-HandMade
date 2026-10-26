@@ -91,7 +91,7 @@ public class MaidUseMortarBehavior extends MaidCheckRateTask {
         }
 
         ItemStack toGrind = input.copyWithCount(1);
-        mortar.set(ModDataComponents.MORTAR_CONTENTS.get(), new MortarContents(toGrind));
+        mortar.set(ModDataComponents.MORTAR_CONTENTS.get(), new MortarContents(toGrind, 0));
 
         // 消耗副手 1 个原料
         input.shrink(1);
