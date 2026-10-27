@@ -52,6 +52,8 @@ public class ManualBindHandler {
         }
 
         if (!isValidBindTarget(stack.getItem(), serverLevel, event.getPos())) {
+            event.setUseItem(TriState.FALSE);
+            event.setUseBlock(TriState.FALSE);
             return;
         }
 
@@ -72,6 +74,7 @@ public class ManualBindHandler {
         if (clearIfBound(stack)) {
             onCleared(serverPlayer);
         }
+        event.setCanceled(true);
     }
 
     private static boolean isBindableTool(ItemStack stack) {

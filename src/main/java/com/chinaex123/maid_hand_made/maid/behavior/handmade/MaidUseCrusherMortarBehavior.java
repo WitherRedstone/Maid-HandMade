@@ -1,9 +1,8 @@
 package com.chinaex123.maid_hand_made.maid.behavior.handmade;
 
-import com.alben.createhandmade.ModDataComponents;
+import com.alben.createhandmade.api.CreateHandMadeApi;
 import com.alben.createhandmade.item.CrusherMortarItem;
 import com.alben.createhandmade.item.MortarContents;
-import com.chinaex123.maid_hand_made.mixin.CrusherMortarItemMixin;
 import com.chinaex123.maid_hand_made.util.MaidInventoryHelper;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidCheckRateTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
@@ -90,7 +89,7 @@ public class MaidUseCrusherMortarBehavior extends MaidCheckRateTask {
         }
 
         ItemStack toGrind = input.copyWithCount(1);
-        mortar.set(ModDataComponents.MORTAR_CONTENTS.get(), new MortarContents(toGrind, 0));
+        CreateHandMadeApi.setMortarContents(mortar, new MortarContents(toGrind, 0));
 
         // 消耗副手 1 个原料
         input.shrink(1);
@@ -110,7 +109,7 @@ public class MaidUseCrusherMortarBehavior extends MaidCheckRateTask {
 
         ItemStack mortar = maid.getMainHandItem();
         return mortar.getItem() instanceof CrusherMortarItem
-                && mortar.has(ModDataComponents.MORTAR_CONTENTS.get());
+                && CreateHandMadeApi.mortarContents(mortar) != null;
     }
 
     @Override
@@ -146,11 +145,11 @@ public class MaidUseCrusherMortarBehavior extends MaidCheckRateTask {
         // 中断时退还碾钵里未完成的原料
         ItemStack mortar = maid.getMainHandItem();
         if (mortar.getItem() instanceof CrusherMortarItem) {
-            MortarContents contents = mortar.get(ModDataComponents.MORTAR_CONTENTS.get());
+            MortarContents contents = CreateHandMadeApi.mortarContents(mortar);
             if (contents != null && !contents.stack().isEmpty()) {
                 MaidInventoryHelper.addToBackpack(maid, contents.stack());
             }
-            mortar.remove(ModDataComponents.MORTAR_CONTENTS.get());
+            CreateHandMadeApi.setMortarContents(mortar, null);
         }
 
         grindTicks = 0;
@@ -200,14 +199,14 @@ public class MaidUseCrusherMortarBehavior extends MaidCheckRateTask {
     }
 
     private RecipeHolder<?> findRecipe(ServerLevel world, ItemStack input) {
-        return CrusherMortarItemMixin.invokeFindRecipe(world, input);
+        return CrusherMortarItem.findRecipe(world, input);
     }
 
     private void finishGrinding(ServerLevel world, EntityMaid maid) {
         ItemStack mortar = maid.getMainHandItem();
         if (!(mortar.getItem() instanceof CrusherMortarItem)) return;
 
-        MortarContents contents = mortar.get(ModDataComponents.MORTAR_CONTENTS.get());
+        MortarContents contents = CreateHandMadeApi.mortarContents(mortar);
         if (contents == null || contents.stack().isEmpty()) return;
 
         RecipeHolder<?> recipe = findRecipe(world, contents.stack());
@@ -220,7 +219,7 @@ public class MaidUseCrusherMortarBehavior extends MaidCheckRateTask {
             }
         }
 
-        mortar.remove(ModDataComponents.MORTAR_CONTENTS.get());
+        CreateHandMadeApi.setMortarContents(mortar, null);
         mortar.hurtAndBreak(1, maid, EquipmentSlot.MAINHAND);
     }
 
@@ -231,7 +230,7 @@ public class MaidUseCrusherMortarBehavior extends MaidCheckRateTask {
                 2.0f + (world.random.nextFloat() - 0.5f) * 0.2f);
 
         ItemStack mortar = maid.getMainHandItem();
-        MortarContents contents = mortar.get(ModDataComponents.MORTAR_CONTENTS.get());
+        MortarContents contents = CreateHandMadeApi.mortarContents(mortar);
         if (contents == null) return;
 
         Vec3 eye = maid.getEyePosition(1f);

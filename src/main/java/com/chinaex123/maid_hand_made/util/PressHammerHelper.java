@@ -1,8 +1,9 @@
 package com.chinaex123.maid_hand_made.util;
 
+import com.alben.createhandmade.api.CreateHandMadeApi;
+import com.alben.createhandmade.item.PressHammerItem;
 import com.alben.createhandmade.recipe.HandMadeRecipePool;
 import com.alben.createhandmade.recipe.HandMadeTool;
-import com.chinaex123.maid_hand_made.mixin.PressHammerItemMixin;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour.TransportedResult;
@@ -19,7 +20,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.List;
 
-@SuppressWarnings("ConstantConditions")
 public final class PressHammerHelper {
 
     private PressHammerHelper() {}
@@ -32,7 +32,7 @@ public final class PressHammerHelper {
         if (level.getBlockEntity(pos) instanceof DepotBlockEntity depot) {
             ItemStack held = depot.getHeldItem();
             return !held.isEmpty()
-                    && PressHammerItemMixin.invokeFindPressingRecipe(level, held) != null;
+                    && PressHammerItem.findPressingRecipe(level, held) != null;
         }
 
         TransportedItemStackHandlerBehaviour handler =
@@ -48,8 +48,8 @@ public final class PressHammerHelper {
         if (basin.isEmpty()) return false;
         try {
             List<RecipeHolder<?>> merged = HandMadeRecipePool.mergeInGlobalOrder(level,
-                    HandMadeRecipePool.getBaseRecipes(HandMadeTool.PRESS_HAMMER_BASIN, level),
-                    HandMadeRecipePool.getBaseRecipes(HandMadeTool.PRESS_HAMMER_AUTO_SQUARE, level));
+                    CreateHandMadeApi.recipesFor(HandMadeTool.PRESS_HAMMER_BASIN, level),
+                    CreateHandMadeApi.recipesFor(HandMadeTool.PRESS_HAMMER_AUTO_SQUARE, level));
             for (RecipeHolder<?> holder : merged) {
                 if (BasinRecipe.match(basin, holder.value())) {
                     return true;
@@ -65,7 +65,7 @@ public final class PressHammerHelper {
         handler.handleProcessingOnAllItems(item -> {
             if (found[0]) return TransportedResult.doNothing();
             if (!item.stack.isEmpty()) {
-                RecipeHolder<?> recipe = PressHammerItemMixin.invokeFindPressingRecipe(level, item.stack);
+                RecipeHolder<?> recipe = PressHammerItem.findPressingRecipe(level, item.stack);
                 if (recipe != null) {
                     found[0] = true;
                 }
@@ -76,17 +76,17 @@ public final class PressHammerHelper {
     }
 
     public static boolean press(ServerLevel level, LivingEntity user, BlockPos pos, ItemStack stack) {
-        List<ItemStack> particleItems = PressHammerItemMixin.invokeFindTargetItems(level, pos);
+        List<ItemStack> particleItems = PressHammerItem.findTargetItems(level, pos);
 
         boolean worked = false;
-        if (PressHammerItemMixin.invokeTryPressBasin(level, pos)) {
+        if (PressHammerItem.tryPressBasin(level, pos)) {
             worked = true;
-        } else if (PressHammerItemMixin.invokeTryPressTransported(level, pos)) {
+        } else if (PressHammerItem.tryPressTransported(level, pos)) {
             worked = true;
         }
 
         if (!particleItems.isEmpty()) {
-            PressHammerItemMixin.invokeBroadcastParticles(level, pos, particleItems);
+            PressHammerItem.broadcastParticles(level, pos, particleItems);
         }
         AllSoundEvents.MECHANICAL_PRESS_ACTIVATION.playOnServer(level, pos, 1f, 0.8f);
 

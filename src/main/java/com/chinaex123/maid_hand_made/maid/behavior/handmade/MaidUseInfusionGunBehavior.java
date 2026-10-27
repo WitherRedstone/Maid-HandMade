@@ -1,5 +1,6 @@
 package com.chinaex123.maid_hand_made.maid.behavior.handmade;
 
+import com.alben.createhandmade.api.CreateHandMadeApi;
 import com.alben.createhandmade.item.InfusionGunContents;
 import com.alben.createhandmade.item.InfusionGunItem;
 import com.chinaex123.maid_hand_made.maid.behavior.MaidUseItemOnMachineBehavior;
@@ -55,7 +56,7 @@ public class MaidUseInfusionGunBehavior extends MaidUseItemOnMachineBehavior {
         ItemStack gun = getMainHandStack(maid);
         if (gun.isEmpty() || !(gun.getItem() instanceof InfusionGunItem)) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
         boolean isBasin = world.getBlockEntity(pos) instanceof BasinBlockEntity;
 
         // 枪空：吸流体源 / 抽容器（含 Basin，Basin 可抽不可放）
@@ -93,7 +94,7 @@ public class MaidUseInfusionGunBehavior extends MaidUseItemOnMachineBehavior {
         maid.setDeltaMovement(0, maid.getDeltaMovement().y, 0);
         maid.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 
-        InfusionGunContents contents = InfusionGunItem.getContents(stack);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(stack);
         boolean isBasin = world.getBlockEntity(pos) instanceof BasinBlockEntity;
 
         // 工作盆 只能抽不能放：枪有流体时直接跳过

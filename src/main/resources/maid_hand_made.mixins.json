@@ -3,12 +3,9 @@
   "package": "com.chinaex123.maid_hand_made.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "PressHammerItemMixin",
-    "MortarItemMixin",
-    "CrusherMortarItemMixin",
-    "PointerItemMixin",
-    "InfusionGunItemMixin",
-    "BellowsItemMixin"
+    "PressHammerItemUseMixin",
+    "InfusionGunItemUseMixin",
+    "BellowsItemUseMixin"
   ],
   "injectors": {
     "defaultRequire": 1

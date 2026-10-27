@@ -1,11 +1,11 @@
 package com.chinaex123.maid_hand_made.util;
 
 import com.alben.createhandmade.bellows.BellowsMediaRegistry;
+import com.alben.createhandmade.item.BellowsItem;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
 import com.simibubi.create.content.kinetics.fan.processing.FanProcessingType;
 import com.simibubi.create.content.logistics.depot.DepotBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.chinaex123.maid_hand_made.mixin.BellowsItemMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -50,6 +50,6 @@ public final class BellowsHelper {
         if (candidateIds.isEmpty()) return false;
         @Nullable ResourceLocation preferred = effective.preferred();
         FanProcessingType[] pickedOut = new FanProcessingType[]{null};
-        return BellowsItemMixin.invokeApplyToTarget(level, pos, candidateIds, preferred, pickedOut);
+        return BellowsItem.applyToTarget(level, pos, candidateIds, preferred, pickedOut);
     }
 }

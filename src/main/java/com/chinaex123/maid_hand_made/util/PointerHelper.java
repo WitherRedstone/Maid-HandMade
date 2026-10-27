@@ -1,8 +1,8 @@
 package com.chinaex123.maid_hand_made.util;
 
+import com.alben.createhandmade.item.PointerItem;
 import com.alben.createhandmade.network.PressParticlesPacket;
 import com.alben.createhandmade.recipe.HandMadeApplicationRecipe;
-import com.chinaex123.maid_hand_made.mixin.PointerItemMixin;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour.TransportedResult;
@@ -31,7 +31,7 @@ public final class PointerHelper {
     private PointerHelper() { }
 
     public static @NotNull RecipeHolder<?> findRecipe(Level level, ItemStack target, ItemStack tool) {
-        return PointerItemMixin.invokeFindRecipe(level, target, tool);
+        return PointerItem.findRecipe(level, target, tool);
     }
 
     public static boolean isPointerTarget(Level level, BlockPos pos) {

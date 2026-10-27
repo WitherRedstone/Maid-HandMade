@@ -1,8 +1,8 @@
 package com.chinaex123.maid_hand_made.util;
 
+import com.alben.createhandmade.api.CreateHandMadeApi;
 import com.alben.createhandmade.item.InfusionGunContents;
 import com.alben.createhandmade.item.InfusionGunItem;
-import com.chinaex123.maid_hand_made.mixin.InfusionGunItemMixin;
 import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour.TransportedResult;
@@ -36,7 +36,7 @@ public final class InfusionGunHelper {
         IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null);
         if (handler == null) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
         if (contents.remaining() <= 0) return false;
 
         FluidStack source = FluidStack.EMPTY;
@@ -58,7 +58,7 @@ public final class InfusionGunHelper {
         FluidStack actual = handler.drain(source.copyWithAmount(want), IFluidHandler.FluidAction.EXECUTE);
         if (actual.isEmpty()) return false;
 
-        InfusionGunItem.setContents(gun, contents.withFill(actual));
+        CreateHandMadeApi.setInfusionGunContents(gun, contents.withFill(actual));
         damageGun(gun, user);
 
         level.playSound(null, pos, FluidHelper.getFillSound(actual),
@@ -68,10 +68,10 @@ public final class InfusionGunHelper {
     }
 
     public static boolean tryPickupFluidBlock(Level level, BlockPos pos, LivingEntity user, ItemStack gun) {
-        FluidStack source = InfusionGunItemMixin.invokeGetFluidFromSource(level, pos);
+        FluidStack source = CreateHandMadeApi.fluidSourceAt(level, pos);
         if (source.isEmpty()) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
 
         if (!contents.isEmpty() && !FluidStack.isSameFluidSameComponents(contents.fluid(), source)) {
             return false;
@@ -82,7 +82,7 @@ public final class InfusionGunHelper {
         level.playSound(null, pos, FluidHelper.getFillSound(source),
                 SoundSource.PLAYERS, 1.0f, 1.0f);
 
-        InfusionGunItem.setContents(gun, contents.withFill(source));
+        CreateHandMadeApi.setInfusionGunContents(gun, contents.withFill(source));
         damageGun(gun, user);
         return true;
     }
@@ -92,7 +92,7 @@ public final class InfusionGunHelper {
                 BlockEntityBehaviour.get(level, pos, TransportedItemStackHandlerBehaviour.TYPE);
         if (handler == null) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
         if (contents.isEmpty()) return false;
 
         boolean[] success = {false};
@@ -103,18 +103,18 @@ public final class InfusionGunHelper {
             if (stack.isEmpty()) return TransportedResult.doNothing();
 
             RecipeHolder<? extends StandardProcessingRecipe<?>> recipe =
-                    InfusionGunItemMixin.invokeFindFillingRecipe(level, stack, contents.fluid());
+                    InfusionGunItem.findFillingRecipe(level, stack, contents.fluid());
             if (recipe != null) {
-                int required = InfusionGunItemMixin.invokeRequiredFluidOf(recipe.value()).amount();
+                int required = InfusionGunItem.requiredFluidOf(recipe.value()).amount();
                 if (contents.fluid().getAmount() < required) return TransportedResult.doNothing();
 
                 List<ItemStack> results = recipe.value().rollResults(level.random);
 
                 success[0] = true;
-                InfusionGunItem.setContents(gun, contents.withDrain(required));
-                InfusionGunItemMixin.invokeBroadcastFluidParticles(level, pos, contents.fluid());
+                CreateHandMadeApi.setInfusionGunContents(gun, contents.withDrain(required));
+                InfusionGunItem.broadcastFluidParticles(level, pos, contents.fluid());
 
-                return InfusionGunItemMixin.invokeFinishInject(item, stack, results);
+                return InfusionGunItem.finishInject(item, stack, results);
             }
 
             if (GenericItemFilling.canItemBeFilled(level, stack)) {
@@ -127,12 +127,12 @@ public final class InfusionGunHelper {
                 if (simulatedResult.isEmpty()) return TransportedResult.doNothing();
 
                 success[0] = true;
-                InfusionGunItem.setContents(gun, contents.withDrain(required));
-                InfusionGunItemMixin.invokeBroadcastFluidParticles(level, pos, contents.fluid());
+                CreateHandMadeApi.setInfusionGunContents(gun, contents.withDrain(required));
+                InfusionGunItem.broadcastFluidParticles(level, pos, contents.fluid());
 
                 List<ItemStack> results = new ArrayList<>();
                 results.add(simulatedResult);
-                return InfusionGunItemMixin.invokeFinishInject(item, stack, results);
+                return InfusionGunItem.finishInject(item, stack, results);
             }
 
             return TransportedResult.doNothing();
@@ -150,14 +150,14 @@ public final class InfusionGunHelper {
         IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null);
         if (handler == null) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
         if (contents.isEmpty()) return false;
 
         FluidStack fluid = contents.fluid();
         int actual = handler.fill(fluid.copy(), IFluidHandler.FluidAction.EXECUTE);
         if (actual <= 0) return false;
 
-        InfusionGunItem.setContents(gun, contents.withDrain(actual));
+        CreateHandMadeApi.setInfusionGunContents(gun, contents.withDrain(actual));
         damageGun(gun, user);
 
         level.playSound(null, pos, FluidHelper.getEmptySound(fluid),
@@ -166,7 +166,7 @@ public final class InfusionGunHelper {
     }
 
     public static boolean isFluidSource(Level level, BlockPos pos) {
-        return !InfusionGunItemMixin.invokeGetFluidFromSource(level, pos).isEmpty();
+        return !CreateHandMadeApi.fluidSourceAt(level, pos).isEmpty();
     }
 
     public static boolean containerHasFluid(Level level, BlockPos pos) {
@@ -183,19 +183,19 @@ public final class InfusionGunHelper {
                 BlockEntityBehaviour.get(level, pos, TransportedItemStackHandlerBehaviour.TYPE);
         if (handler == null) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
         if (contents.isEmpty()) return false;
 
-        return InfusionGunItemMixin.invokeCanInjectItemsAt(level, pos, contents);
+        return InfusionGunItem.canInjectItemsAt(level, pos, contents);
     }
 
     public static boolean canFillItem(Level level, ItemStack target, FluidStack fluid) {
         if (target.isEmpty() || fluid.isEmpty()) return false;
 
         RecipeHolder<? extends StandardProcessingRecipe<?>> recipe =
-                InfusionGunItemMixin.invokeFindFillingRecipe(level, target, fluid);
+                InfusionGunItem.findFillingRecipe(level, target, fluid);
         if (recipe != null) {
-            int required = InfusionGunItemMixin.invokeRequiredFluidOf(recipe.value()).amount();
+            int required = InfusionGunItem.requiredFluidOf(recipe.value()).amount();
             return fluid.getAmount() >= required;
         }
 
@@ -213,22 +213,22 @@ public final class InfusionGunHelper {
         ItemStack held = depot.getHeldItem();
         if (held.isEmpty()) return false;
 
-        InfusionGunContents contents = InfusionGunItem.getContents(gun);
+        InfusionGunContents contents = CreateHandMadeApi.infusionGunContents(gun);
         if (contents.isEmpty()) return false;
 
         RecipeHolder<? extends StandardProcessingRecipe<?>> recipe =
-                InfusionGunItemMixin.invokeFindFillingRecipe(level, held, contents.fluid());
+                InfusionGunItem.findFillingRecipe(level, held, contents.fluid());
         if (recipe != null) {
-            int required = InfusionGunItemMixin.invokeRequiredFluidOf(recipe.value()).amount();
+            int required = InfusionGunItem.requiredFluidOf(recipe.value()).amount();
             if (contents.fluid().getAmount() < required) return false;
 
             List<ItemStack> results = recipe.value().rollResults(level.random);
 
-            InfusionGunItem.setContents(gun, contents.withDrain(required));
-            InfusionGunItemMixin.invokeBroadcastFluidParticles(level, pos, contents.fluid());
+            CreateHandMadeApi.setInfusionGunContents(gun, contents.withDrain(required));
+            InfusionGunItem.broadcastFluidParticles(level, pos, contents.fluid());
             damageGun(gun, user);
 
-            depot.setHeldItem(results.isEmpty() ? ItemStack.EMPTY : results.get(0));
+            depot.setHeldItem(results.isEmpty() ? ItemStack.EMPTY : results.getFirst());
             depot.notifyUpdate();
             depot.sendData();
 
@@ -244,8 +244,8 @@ public final class InfusionGunHelper {
                     level, required, held.copy(), contents.fluid().copy());
             if (simulatedResult.isEmpty()) return false;
 
-            InfusionGunItem.setContents(gun, contents.withDrain(required));
-            InfusionGunItemMixin.invokeBroadcastFluidParticles(level, pos, contents.fluid());
+            CreateHandMadeApi.setInfusionGunContents(gun, contents.withDrain(required));
+            InfusionGunItem.broadcastFluidParticles(level, pos, contents.fluid());
             damageGun(gun, user);
 
             depot.setHeldItem(simulatedResult);
