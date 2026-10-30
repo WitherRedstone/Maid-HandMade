@@ -3,6 +3,7 @@ package com.chinaex123.maid_hand_made.maid.behavior.handmade;
 import com.alben.createhandmade.api.CreateHandMadeApi;
 import com.alben.createhandmade.item.MortarContents;
 import com.alben.createhandmade.item.MortarItem;
+import com.chinaex123.maid_hand_made.config.ServerConfig;
 import com.chinaex123.maid_hand_made.util.MaidInventoryHelper;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidCheckRateTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
@@ -32,10 +33,8 @@ import java.util.List;
  */
 public class MaidUseMortarBehavior extends MaidCheckRateTask {
 
-    private static final int FORCED_DURATION = 100;
-    private static final int WINDUP_TICKS = FORCED_DURATION / 5;
-
     private int grindTicks;
+    private int grindDuration;
     private boolean finished;
 
     public MaidUseMortarBehavior() {
@@ -92,6 +91,8 @@ public class MaidUseMortarBehavior extends MaidCheckRateTask {
         ItemStack toGrind = input.copyWithCount(1);
         CreateHandMadeApi.setMortarContents(mortar, new MortarContents(toGrind, 0));
 
+        grindDuration = ServerConfig.MORTAR_PROCESSING_TICKS.get();
+
         // 消耗副手 1 个原料
         input.shrink(1);
         if (input.isEmpty()) {
@@ -127,8 +128,8 @@ public class MaidUseMortarBehavior extends MaidCheckRateTask {
 
         grindTicks++;
 
-        if (grindTicks < FORCED_DURATION) {
-            if (grindTicks >= WINDUP_TICKS && grindTicks % 4 == 0) {
+        if (grindTicks < grindDuration) {
+            if (grindTicks >= grindDuration / 5 && grindTicks % 4 == 0) {
                 playGrindEffects(world, maid);
             }
             return;
@@ -154,6 +155,7 @@ public class MaidUseMortarBehavior extends MaidCheckRateTask {
         }
 
         grindTicks = 0;
+        grindDuration = 0;
         finished = false;
     }
 

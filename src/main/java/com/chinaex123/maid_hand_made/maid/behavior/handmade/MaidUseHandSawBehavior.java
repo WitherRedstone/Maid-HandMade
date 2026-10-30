@@ -1,6 +1,7 @@
 package com.chinaex123.maid_hand_made.maid.behavior.handmade;
 
 import com.alben.createhandmade.item.HandSawItem;
+import com.chinaex123.maid_hand_made.config.ServerConfig;
 import com.chinaex123.maid_hand_made.util.HandSawHelper;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidCheckRateTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
@@ -22,13 +23,8 @@ import org.jetbrains.annotations.NotNull;
  */
 public class MaidUseHandSawBehavior extends MaidCheckRateTask {
 
-    /** 切削周期（tick） */
-    private static final int CUT_DURATION = 30;
+    private int cutDuration;
 
-    /** 起手阶段长度 */
-    private static final int WINDUP_TICKS = 10;
-
-    /** 切削倒计时 */
     private int cutTicks;
 
     public MaidUseHandSawBehavior() {
@@ -59,6 +55,8 @@ public class MaidUseHandSawBehavior extends MaidCheckRateTask {
         // 锁移动
         maid.getNavigation().stop();
         maid.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+
+        cutDuration = ServerConfig.HAND_SAW_PROCESSING_TICKS.get();
         cutTicks = 0;
     }
 
@@ -95,9 +93,10 @@ public class MaidUseHandSawBehavior extends MaidCheckRateTask {
 
         cutTicks++;
 
-        // 起手 10 tick 后开始音效 + 粒子
-        if (cutTicks < CUT_DURATION) {
-            if (cutTicks >= WINDUP_TICKS && cutTicks % 4 == 0) {
+        // 起手阶段过后开始音效 + 粒子
+        if (cutTicks < cutDuration) {
+            int windup = cutDuration / 3;
+            if (cutTicks >= windup && cutTicks % 4 == 0) {
                 playCutEffects(world, maid, off);
             }
             return;

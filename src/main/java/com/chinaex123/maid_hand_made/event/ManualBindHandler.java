@@ -1,12 +1,14 @@
 package com.chinaex123.maid_hand_made.event;
 
 import com.alben.createhandmade.item.BellowsItem;
+import com.alben.createhandmade.item.InfusionGunItem;
 import com.alben.createhandmade.item.PointerItem;
 import com.alben.createhandmade.item.PressHammerItem;
 import com.alben.createhandmade.item.StirringStaffItem;
 import com.chinaex123.maid_hand_made.client.BoundHighlightHandler;
 import com.chinaex123.maid_hand_made.init.ModDataComponents;
 import com.chinaex123.maid_hand_made.network.BoundHighlightPacket;
+import com.chinaex123.maid_hand_made.util.InfusionGunHelper;
 import com.chinaex123.maid_hand_made.util.PointerHelper;
 import com.chinaex123.maid_hand_made.util.PressHammerHelper;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour;
@@ -81,7 +83,8 @@ public class ManualBindHandler {
         return stack.getItem() instanceof PressHammerItem
                 || stack.getItem() instanceof StirringStaffItem
                 || stack.getItem() instanceof BellowsItem
-                || stack.getItem() instanceof PointerItem;
+                || stack.getItem() instanceof PointerItem
+                || stack.getItem() instanceof InfusionGunItem;
     }
 
     private static boolean isValidBindTarget(Object item, ServerLevel level, BlockPos pos) {
@@ -96,6 +99,9 @@ public class ManualBindHandler {
         }
         if (item instanceof PointerItem) {
             return PointerHelper.isPointerTarget(level, pos);
+        }
+        if (item instanceof InfusionGunItem) {
+            return isInfusionGunTarget(level, pos);
         }
         return false;
     }
@@ -127,6 +133,18 @@ public class ManualBindHandler {
                 TransportedItemStackHandlerBehaviour.TYPE) != null;
     }
 
+    private static boolean isInfusionGunTarget(ServerLevel level, BlockPos pos) {
+        // 流体源方块
+        if (InfusionGunHelper.isFluidSource(level, pos)) return true;
+        // 置物台
+        if (level.getBlockEntity(pos) instanceof DepotBlockEntity) return true;
+        // 传送带
+        if (BlockEntityBehaviour.get(level, pos,
+                TransportedItemStackHandlerBehaviour.TYPE) != null) return true;
+        // 任意流体容器
+        return InfusionGunHelper.containerHasFluid(level, pos);
+    }
+
     private static void setBound(ServerPlayer player, ServerLevel level, BlockPos pos, ItemStack stack) {
         BlockState state = level.getBlockState(pos);
         Component name = state.getBlock().getName();
@@ -135,13 +153,10 @@ public class ManualBindHandler {
         stack.set(ModDataComponents.BOUND_TEXT.get(),
                 name.getString() + "[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + "]");
 
-        boolean isPointer = stack.getItem() instanceof PointerItem;
-        if (!isPointer) {
-            PacketDistributor.sendToPlayer(player,
-                    new BoundHighlightPacket(pos, BoundHighlightHandler.DEFAULT_DURATION));
-            level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP,
-                    SoundSource.PLAYERS, 1.0F, 1.0F);
-        }
+        PacketDistributor.sendToPlayer(player,
+                new BoundHighlightPacket(pos, BoundHighlightHandler.DEFAULT_DURATION));
+        level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP,
+                SoundSource.PLAYERS, 1.0F, 1.0F);
 
         player.displayClientMessage(
                 Component.translatable("message.maid_hand_made.bound_success",

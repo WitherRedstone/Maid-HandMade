@@ -2,6 +2,7 @@ package com.chinaex123.maid_hand_made.maid.behavior.handmade;
 
 import com.alben.createhandmade.item.StirringStaffItem;
 import com.alben.createhandmade.network.PressParticlesPacket;
+import com.chinaex123.maid_hand_made.config.ServerConfig;
 import com.chinaex123.maid_hand_made.maid.behavior.MaidUseItemOnMachineBehavior;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.simibubi.create.AllSoundEvents;
@@ -23,10 +24,7 @@ import org.jetbrains.annotations.NotNull;
 public class MaidUseStirringStaffBehavior extends MaidUseItemOnMachineBehavior {
 
     /** 搅拌时长 */
-    private static final int STIR_DURATION = 60;
-
-    /** 起手阶段长度 */
-    private static final int WINDUP_TICKS = 8;
+    private int stirDuration;
 
     /** 搅拌倒计时 */
     private int stirTicks;
@@ -78,13 +76,15 @@ public class MaidUseStirringStaffBehavior extends MaidUseItemOnMachineBehavior {
         if (stirTicks <= 0) {
             cachedRecipe = StirringStaffItem.findMatchingRecipe(world, basin);
             if (cachedRecipe == null) return true;   // 没配方，结束
-            stirTicks = STIR_DURATION;
+            stirDuration = ServerConfig.STIRRING_STAFF_PROCESSING_TICKS.get();
+            stirTicks = stirDuration;
         }
 
         stirTicks--;
 
-        int used = STIR_DURATION - stirTicks;
-        if (used >= WINDUP_TICKS && used % 4 == 0) {
+        int used = stirDuration - stirTicks;
+        int windup = stirDuration / 5;
+        if (used >= windup && used % 4 == 0) {
             playStirEffects(world, pos, basin);
         }
 
